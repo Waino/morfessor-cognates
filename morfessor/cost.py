@@ -87,3 +87,62 @@ class Cost(object):
 
     def get_coding_cost(self, compound):
         return self._lexicon_coding.get_codelength(compound) / self._corpus_coding.weight
+
+
+class HierarchicalCost(Cost):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._lexicon_coding_src = self._lexicon_coding
+        self._lexicon_coding_trg = LexiconEncoding()
+        self._lexicon_coding = HierarchicalLexiconEncoding(
+            self._lexicon_coding_src,
+            self._lexicon_coding_trg)
+        self.counts_src = Counter()
+        self.counts_trg = Counter()
+
+    def cost(self):
+        return (self._lexicon_coding_src.get_cost()
+            + self._lexicon_coding_trg.get_cost()
+            + self._lexicon_coding.get_cost()
+            + self._corpus_coding.get_cost())
+
+    def update(self, construction, delta):
+        if delta == 0:
+            return
+
+        src, trg = self.cc.lex_key(construction)
+        if self.counts[construction] == 0:
+            self._lexicon_coding.add(self.cc.lex_key(construction))
+        if self.counts_src[src] == 0:
+            self._lexicon_coding_src.add(src)
+        if self.counts_trg[trg] == 0:
+            self._lexicon_coding_trg.add(trg)
+
+        old_count = self.counts[construction]
+        self.counts[construction] += delta
+
+        self._corpus_coding.update_count(self.cc.corpus_key(construction), old_count, self.counts[construction])
+
+        if self.counts[construction] == 0:
+            self._lexicon_coding.remove(self.cc.lex_key(construction))
+        if self.counts_src[src] == 0:
+            self._lexicon_coding_src.remove(src)
+        if self.counts_trg[trg] == 0:
+            self._lexicon_coding_trg.remove(trg)
+
+    def bad_likelihood(self, compound, addcount):
+        lt = math.log(self.all_tokens() + addcount) if addcount > 0 else 0
+        nb = self.newbound_cost(addcount) if addcount > 0 else 0
+        src, trg = compound
+
+        return 1.0 + len(self.cc.corpus_key(compound)) * lt + nb + \
+                        self._lexicon_coding_src.get_codelength(src) + \
+                        self._lexicon_coding_trg.get_codelength(trg) + \
+                        self._lexicon_coding.get_codelength(compound) / \
+                        self._corpus_coding.weight
+
+    def get_coding_cost(self, compound):
+        lex_cost = self._lexicon_coding_src.get_codelength(src) + \
+            self._lexicon_coding_trg.get_codelength(trg) + \
+            self._lexicon_coding.get_codelength(compound)
+        return lex_cost / self._corpus_coding.weight

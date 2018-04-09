@@ -101,8 +101,8 @@ class CognateConstructionMethods(object):
 
     @staticmethod
     def lex_key(construction):
-        return construction.src
+        return construction
 
     @staticmethod
     def atoms(construction):
-        return construction.src
+        return construction
