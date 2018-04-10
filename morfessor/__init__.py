@@ -39,4 +39,4 @@ from .evaluation import MorfessorEvaluation, MorfessorEvaluationResult
 
 from .constructions.base import BaseConstructionMethods
 from .constructions.parallel import ParallelConstructionMethods
-from .constructions.cognate import CognateConstructionMethods
+from .constructions.cognate import CognateConstructionMethods, WILDCARD

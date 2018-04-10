@@ -1,14 +1,24 @@
 import collections
+from functools import total_ordering
 
+@total_ordering
 class Wildcard(object):
     def __repr__(self):
         return ''
 
     def __len__(self):
-        return 1
+        return 2
 
     def __eq__(self, other):
         return isinstance(other, Wildcard)
+
+    def __hash__(self):
+        return hash('')
+
+    def __lt__(self, other):
+        if other == self:
+            return False
+        return True
 
 WILDCARD = Wildcard()
 
