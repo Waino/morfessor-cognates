@@ -24,12 +24,19 @@ def main(argv):
         data.append(DataPoint(count=1, compound=compound, splitlocs=()))
 
     model = BaselineModel(corpusweight=alpha, constr_class=CognateConstructionMethods)
+    model.cost.set_edit_weight(10)
     model.load_data(data)
     model.train_batch()
 
     with io.open(argv[2], 'w', encoding='utf-8') as outf:
         for c,_,w in model.get_segmentations():
             print("{} {}".format(c, " + ".join(CognateConstructionMethods.to_string(w1) for w1 in w)), file=outf)
+    for w, c in model.cost.edit_cost.counts.most_common():
+        print('{}\t{}'.format(w, c))
+    print('final cost components', file=sys.stderr)
+    print('src  {}'.format(model.cost.src_cost.cost()), file=sys.stderr)
+    print('trg  {}'.format(model.cost.trg_cost.cost()), file=sys.stderr)
+    print('edit {}'.format(model.cost.edit_cost.cost()), file=sys.stderr)
 
 class opts(dict):
     log_file = None

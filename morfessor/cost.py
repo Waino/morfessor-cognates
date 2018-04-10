@@ -2,6 +2,7 @@
 import logging
 import numbers
 from collections import Counter
+import Levenshtein
 
 import math
 
@@ -100,6 +101,8 @@ class CognateCost(object):
     def __init__(self, contr_class, corpusweight=1.0):
         self.src_cost = Cost(contr_class, corpusweight=corpusweight)
         self.trg_cost = Cost(contr_class, corpusweight=corpusweight)
+        self.edit_cost = Cost(contr_class, corpusweight=corpusweight)
+        self.edit_weight = 1.0
 
         self.cc = contr_class
         self._corpus_weight_updater = None
@@ -120,9 +123,13 @@ class CognateCost(object):
     def set_corpus_coding_weight(self, weight):
         self.src_cost.set_corpus_coding_weight(weight)
         self.trg_cost.set_corpus_coding_weight(weight)
+        self.edit_cost.set_corpus_coding_weight(weight)
+
+    def set_edit_weight(self, weight):
+        self.edit_weight = weight
 
     def cost(self):
-        return self.src_cost.cost() + self.trg_cost.cost()
+        return self.src_cost.cost() + self.trg_cost.cost() + self.edit_weight * self.edit_cost.cost()
 
     def update(self, construction, delta):
         if delta == 0:
@@ -133,6 +140,9 @@ class CognateCost(object):
             self.src_cost.update(src, delta)
         if trg != WILDCARD:
             self.trg_cost.update(trg, delta)
+        if src != WILDCARD and trg != WILDCARD:
+            for edit in edits(src, trg):
+                self.edit_cost.update(edit, delta)
 
     def update_boundaries(self, delta):
         self.src_cost.update_boundaries(delta)
@@ -168,3 +178,15 @@ class CognateCost(object):
     def get_coding_cost(self, compound):
         src, trg = self.cc.lex_key(compound)
         return self.src_cost.get_coding_cost(src) + self.trg_cost.get_coding_cost(trg)
+
+
+def edits(src, trg):
+    for op, i, j in Levenshtein.editops(src, trg):
+        if op == 'delete':
+            yield (src[i], '')
+        elif op == 'insert':
+            yield ('', trg[j])
+        elif op == 'replace':
+            yield (src[i], trg[j])
+        else:
+            raise Exception(op)
