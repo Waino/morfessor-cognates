@@ -7,7 +7,7 @@ import math
 import numbers
 import random
 
-from .cost import Cost
+from .cost import CognateCost
 from .constructions.base import BaseConstructionMethods
 from .corpus import LexiconEncoding, CorpusEncoding, \
     AnnotatedCorpusEncoding, FixedCorpusWeight
@@ -68,7 +68,7 @@ class BaselineModel(object):
         #Set corpus weight updater
         # self.set_corpus_weight_updater(corpusweight)
 
-        self.cost = Cost(self.cc, corpusweight)
+        self.cost = CognateCost(self.cc, corpusweight)
 
 
     @property
@@ -164,7 +164,7 @@ class BaselineModel(object):
 
     def _add_compound(self, compound, c):
         """Add compound with count c to data."""
-        self.cost._corpus_coding.boundaries += c
+        self.cost.update_boundaries(c)
         self._modify_construction_count(compound, c)
         oldrc = self._analyses[compound].rcount
         self._analyses[compound] = \
@@ -428,7 +428,7 @@ class BaselineModel(object):
         newcost = self.get_cost()
         compounds = list(self.get_compounds())
         _logger.info("Compounds in training data: %s types / %s tokens" %
-                     (len(compounds), self.cost._corpus_coding.boundaries))
+                     (len(compounds), self.cost.compound_tokens()))
 
         if algorithm == 'flatten':
             _logger.info("Flattening analysis tree")
@@ -468,7 +468,7 @@ class BaselineModel(object):
             _logger.info("Epochs: %s\tCost: %s" % (epochs, newcost))
             if (forced_epochs == 0 and
                     newcost >= oldcost - finish_threshold *
-                    self.cost._corpus_coding.boundaries):
+                    self.cost.compound_tokens()):
                 break
             if forced_epochs > 0:
                 forced_epochs -= 1
@@ -600,7 +600,7 @@ class BaselineModel(object):
                 if count > 0:
                     cost += (logtokens - math.log(count + addcount))
                 elif addcount > 0:
-                    if self.cost._corpus_coding.tokens == 0:
+                    if self.cost.tokens() == 0:
                         cost += (addcount * math.log(addcount) +
                                  newboundcost + self.cost.get_coding_cost(construction))
                     else:
@@ -631,9 +631,9 @@ class BaselineModel(object):
         constructions = list(self.cc.splitn(compound, reversed(splitlocs)))
 
         # Add boundary cost
-        cost += (math.log(self.cost._corpus_coding.tokens +
-                          self.cost._corpus_coding.boundaries) -
-                 math.log(self.cost._corpus_coding.boundaries))
+        cost += (math.log(self.cost.tokens() +
+                          self.cost.compound_tokens()) -
+                 math.log(self.cost.compound_tokens()))
         return constructions, cost
 
     #TODO project lambda
@@ -786,7 +786,7 @@ class BaselineModel(object):
 
     def set_corpus_coding_weight(self, weight):
         self._check_segment_only()
-        self.cost._corpus_coding.weight = weight
+        self.cost.set_corpus_coding_weight(weight)
 
     def make_segment_only(self):
         """Reduce the size of this model by removing all non-morphs from the

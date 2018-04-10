@@ -60,11 +60,20 @@ class Cost(object):
         if self.counts[construction] == 0:
             self._lexicon_coding.remove(self.cc.lex_key(construction))
 
+    def update_boundaries(self, delta):
+        self._corpus_coding.boundaries += delta
+
     def coding_length(self, construction):
         pass
 
     def tokens(self):
-        pass
+        return self._corpus_coding.tokens
+
+    def compound_tokens(self):
+        return self._corpus_coding.boundaries
+
+    def types(self):
+        return self._lexicon.coding.boundaries
 
     def all_tokens(self):
         return self._corpus_coding.tokens + self._corpus_coding.boundaries
@@ -82,9 +91,6 @@ class Cost(object):
         return 1.0 + len(self.cc.corpus_key(compound)) * lt + nb + \
                         self._lexicon_coding.get_codelength(compound) / \
                         self._corpus_coding.weight
-
-    def types(self):
-        pass
 
     def get_coding_cost(self, compound):
         return self._lexicon_coding.get_codelength(compound) / self._corpus_coding.weight
@@ -116,7 +122,7 @@ class CognateCost(object):
         self.trg_cost.set_corpus_coding_weight(weight)
 
     def cost(self):
-        return self.src_cost.get_cost() + self.trg_cost.get_cost()
+        return self.src_cost.cost() + self.trg_cost.cost()
 
     def update(self, construction, delta):
         if delta == 0:
@@ -128,11 +134,21 @@ class CognateCost(object):
         if trg != WILDCARD:
             self.trg_cost.update(trg, delta)
 
+    def update_boundaries(self, delta):
+        self.src_cost.update_boundaries(delta)
+        self.trg_cost.update_boundaries(delta)
+
     def coding_length(self, construction):
         pass
 
     def tokens(self):
-        pass
+        return self.src_cost.tokens() + self.trg_cost.tokens()
+
+    def compound_tokens(self):
+        return self.src_cost.compound_tokens() + self.trg_cost.compound_tokens()
+
+    def types(self):
+        return self.src_cost.types() + self.trg_cost.types()
 
     def all_tokens(self):
         return self.src_cost.all_tokens() + self.trg_cost.all_tokens()
@@ -148,9 +164,6 @@ class CognateCost(object):
         if trg != WILDCARD:
             cost += self.trg_cost.bad_likelihood(trg, addcount)
         return cost
-
-    def types(self):
-        pass
 
     def get_coding_cost(self, compound):
         src, trg = self.cc.lex_key(compound)

@@ -32,7 +32,7 @@ class CognateConstructionMethods(object):
                 yield (gi, pi)
 
     @classmethod
-    def _sub_slice(field, start=None, stop=None):
+    def _sub_slice(cls, field, start=None, stop=None):
         if field == WILDCARD:
             return WILDCARD
         start = 0 if start is None else start
