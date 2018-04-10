@@ -15,7 +15,7 @@ def main(argv):
     alpha = float(argv[0])
     data = []
     for line in io.open(argv[1], encoding='utf-8'):
-        src, trg = line.strip().split('/')
+        _, src, trg = line.strip('\n').split('\t')
         if len(src) == 0:
             src = WILDCARD
         if len(trg) == 0:
