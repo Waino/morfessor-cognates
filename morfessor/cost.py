@@ -6,6 +6,7 @@ from collections import Counter
 import math
 
 from .corpus import CorpusEncoding, LexiconEncoding, AnnotatedCorpusEncoding,FixedCorpusWeight
+from .constructions.cognate import WILDCARD
 
 _logger = logging.getLogger(__name__)
 
@@ -89,60 +90,68 @@ class Cost(object):
         return self._lexicon_coding.get_codelength(compound) / self._corpus_coding.weight
 
 
-class HierarchicalCost(Cost):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._lexicon_coding_src = self._lexicon_coding
-        self._lexicon_coding_trg = LexiconEncoding()
-        self._lexicon_coding = HierarchicalLexiconEncoding(
-            self._lexicon_coding_src,
-            self._lexicon_coding_trg)
-        self.counts_src = Counter()
-        self.counts_trg = Counter()
+class CognateCost(object):
+    def __init__(self, contr_class, corpusweight=1.0):
+        self.src_cost = Cost(contr_class, corpusweight=corpusweight)
+        self.trg_cost = Cost(contr_class, corpusweight=corpusweight)
+
+        self.cc = contr_class
+        self._corpus_weight_updater = None
+
+        #Set corpus weight updater
+        self.set_corpus_weight_updater(corpusweight)
+
+    def set_corpus_weight_updater(self, corpus_weight):
+        if corpus_weight is None:
+            self._corpus_weight_updater = FixedCorpusWeight(1.0)
+        elif isinstance(corpus_weight, numbers.Number):
+            self._corpus_weight_updater = FixedCorpusWeight(corpus_weight)
+        else:
+            self._corpus_weight_updater = corpus_weight
+
+        self._corpus_weight_updater.update(self, 0)
+
+    def set_corpus_coding_weight(self, weight):
+        self.src_cost.set_corpus_coding_weight(weight)
+        self.trg_cost.set_corpus_coding_weight(weight)
 
     def cost(self):
-        return (self._lexicon_coding_src.get_cost()
-            + self._lexicon_coding_trg.get_cost()
-            + self._lexicon_coding.get_cost()
-            + self._corpus_coding.get_cost())
+        return self.src_cost.get_cost() + self.trg_cost.get_cost()
 
     def update(self, construction, delta):
         if delta == 0:
             return
 
         src, trg = self.cc.lex_key(construction)
-        if self.counts[construction] == 0:
-            self._lexicon_coding.add(self.cc.lex_key(construction))
-        if self.counts_src[src] == 0:
-            self._lexicon_coding_src.add(src)
-        if self.counts_trg[trg] == 0:
-            self._lexicon_coding_trg.add(trg)
+        if src != WILDCARD:
+            self.src_cost.update(src, delta)
+        if trg != WILDCARD:
+            self.trg_cost.update(trg, delta)
 
-        old_count = self.counts[construction]
-        self.counts[construction] += delta
+    def coding_length(self, construction):
+        pass
 
-        self._corpus_coding.update_count(self.cc.corpus_key(construction), old_count, self.counts[construction])
+    def tokens(self):
+        pass
 
-        if self.counts[construction] == 0:
-            self._lexicon_coding.remove(self.cc.lex_key(construction))
-        if self.counts_src[src] == 0:
-            self._lexicon_coding_src.remove(src)
-        if self.counts_trg[trg] == 0:
-            self._lexicon_coding_trg.remove(trg)
+    def all_tokens(self):
+        return self.src_cost.all_tokens() + self.trg_cost.all_tokens()
+
+    def newbound_cost(self, count):
+        return self.src_cost.newbound_cost(count) + self.trg_cost.newbound_cost(count)
 
     def bad_likelihood(self, compound, addcount):
-        lt = math.log(self.all_tokens() + addcount) if addcount > 0 else 0
-        nb = self.newbound_cost(addcount) if addcount > 0 else 0
-        src, trg = compound
+        src, trg = self.cc.corpus_key(compound)
+        cost = 0
+        if src != WILDCARD:
+            cost += self.src_cost.bad_likelihood(src, addcount)
+        if trg != WILDCARD:
+            cost += self.trg_cost.bad_likelihood(trg, addcount)
+        return cost
 
-        return 1.0 + len(self.cc.corpus_key(compound)) * lt + nb + \
-                        self._lexicon_coding_src.get_codelength(src) + \
-                        self._lexicon_coding_trg.get_codelength(trg) + \
-                        self._lexicon_coding.get_codelength(compound) / \
-                        self._corpus_coding.weight
+    def types(self):
+        pass
 
     def get_coding_cost(self, compound):
-        lex_cost = self._lexicon_coding_src.get_codelength(src) + \
-            self._lexicon_coding_trg.get_codelength(trg) + \
-            self._lexicon_coding.get_codelength(compound)
-        return lex_cost / self._corpus_coding.weight
+        src, trg = self.cc.lex_key(compound)
+        return self.src_cost.get_coding_cost(src) + self.trg_cost.get_coding_cost(trg)
