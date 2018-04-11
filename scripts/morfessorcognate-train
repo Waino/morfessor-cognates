@@ -32,11 +32,26 @@ def main(argv):
         for c,_,w in model.get_segmentations():
             print("{} {}".format(c, " + ".join(CognateConstructionMethods.to_string(w1) for w1 in w)), file=outf)
     for w, c in model.cost.edit_cost.counts.most_common():
-        print('{}\t{}'.format(w, c))
+        if c > 0:
+            print('{}\t{}'.format(w, c))
     print('final cost components', file=sys.stderr)
     print('src  {}'.format(model.cost.src_cost.cost()), file=sys.stderr)
     print('trg  {}'.format(model.cost.trg_cost.cost()), file=sys.stderr)
     print('edit {}'.format(model.cost.edit_cost.cost()), file=sys.stderr)
+    print('src.lex  {}'.format(model.cost.src_cost._lexicon_coding.get_cost()), file=sys.stderr)
+    print('trg.lex  {}'.format(model.cost.trg_cost._lexicon_coding.get_cost()), file=sys.stderr)
+    print('edit.lex {}'.format(model.cost.edit_cost._lexicon_coding.get_cost()), file=sys.stderr)
+    print('src.cor  {}'.format(model.cost.src_cost._corpus_coding.get_cost()), file=sys.stderr)
+    print('trg.cor  {}'.format(model.cost.trg_cost._corpus_coding.get_cost()), file=sys.stderr)
+    print('edit.cor {}'.format(model.cost.edit_cost._corpus_coding.get_cost()), file=sys.stderr)
+    print('src.lex.bnd  {}'.format(model.cost.src_cost._lexicon_coding.boundaries), file=sys.stderr)
+    print('trg.lex.bnd  {}'.format(model.cost.trg_cost._lexicon_coding.boundaries), file=sys.stderr)
+    print('edit.lex.bnd {}'.format(model.cost.edit_cost._lexicon_coding.boundaries), file=sys.stderr)
+    print('src.cor.bnd  {}'.format(model.cost.src_cost._corpus_coding.boundaries), file=sys.stderr)
+    print('trg.cor.bnd  {}'.format(model.cost.trg_cost._corpus_coding.boundaries), file=sys.stderr)
+    print('edit.cor.bnd {}'.format(model.cost.edit_cost._corpus_coding.boundaries), file=sys.stderr)
+    print('edit.lex.tok {}'.format(model.cost.edit_cost._lexicon_coding.tokens), file=sys.stderr)
+    print('edit.lex.logtoksum {}'.format(model.cost.edit_cost._lexicon_coding.logtokensum), file=sys.stderr)
 
 class opts(dict):
     log_file = None

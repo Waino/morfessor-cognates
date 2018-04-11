@@ -164,7 +164,7 @@ class BaselineModel(object):
 
     def _add_compound(self, compound, c):
         """Add compound with count c to data."""
-        self.cost.update_boundaries(c)
+        self.cost.update_boundaries(compound, c)
         self._modify_construction_count(compound, c)
         oldrc = self._analyses[compound].rcount
         self._analyses[compound] = \

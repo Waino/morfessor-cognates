@@ -61,7 +61,7 @@ class Cost(object):
         if self.counts[construction] == 0:
             self._lexicon_coding.remove(self.cc.lex_key(construction))
 
-    def update_boundaries(self, delta):
+    def update_boundaries(self, compound, delta):
         self._corpus_coding.boundaries += delta
 
     def coding_length(self, construction):
@@ -101,7 +101,7 @@ class CognateCost(object):
     def __init__(self, contr_class, corpusweight=1.0):
         self.src_cost = Cost(contr_class, corpusweight=corpusweight)
         self.trg_cost = Cost(contr_class, corpusweight=corpusweight)
-        self.edit_cost = Cost(contr_class, corpusweight=corpusweight)
+        self.edit_cost = Cost(contr_class, corpusweight=1.0)
         self.edit_weight = 1.0
 
         self.cc = contr_class
@@ -123,7 +123,7 @@ class CognateCost(object):
     def set_corpus_coding_weight(self, weight):
         self.src_cost.set_corpus_coding_weight(weight)
         self.trg_cost.set_corpus_coding_weight(weight)
-        self.edit_cost.set_corpus_coding_weight(weight)
+        #self.edit_cost.set_corpus_coding_weight(weight)
 
     def set_edit_weight(self, weight):
         self.edit_weight = weight
@@ -144,9 +144,15 @@ class CognateCost(object):
             for edit in edits(src, trg):
                 self.edit_cost.update(edit, delta)
 
-    def update_boundaries(self, delta):
-        self.src_cost.update_boundaries(delta)
-        self.trg_cost.update_boundaries(delta)
+    def update_boundaries(self, compound, delta):
+        src, trg = self.cc.corpus_key(compound)
+        if src != WILDCARD:
+            self.src_cost.update_boundaries(src, delta)
+        if trg != WILDCARD:
+            self.trg_cost.update_boundaries(trg, delta)
+        if src != WILDCARD and trg != WILDCARD:
+            for edit in edits(src, trg):
+                self.edit_cost.update_boundaries(edit, delta)
 
     def coding_length(self, construction):
         pass
@@ -185,10 +191,10 @@ def edits(src, trg):
         if op == 'equal':
             continue
         if op == 'delete':
-            yield (src[ib:ie], '')
+            yield '/'.join((src[ib:ie], ''))
         elif op == 'insert':
-            yield ('', trg[jb:je])
+            yield '/'.join(('', trg[jb:je]))
         elif op == 'replace':
-            yield (src[ib:ie], trg[jb:je])
+            yield '/'.join((src[ib:ie], trg[jb:je]))
         else:
             raise Exception(op)
