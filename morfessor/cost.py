@@ -185,9 +185,32 @@ class CognateCost(object):
         src, trg = self.cc.lex_key(compound)
         return self.src_cost.get_coding_cost(src) + self.trg_cost.get_coding_cost(trg)
 
+def remove_equal(edits):
+    for edit in edits:
+        if edit[0] == 'equal':
+            continue
+        yield edit
+
+def merge_consecutive_edits(edits):
+    pop, pib, pie, pjb, pje = None, None, None, None, None
+    for op, ib, ie, jb, je in edits:
+        if ib == pie and jb == pje:
+            pop = 'replace'
+            pie = ie
+            pje = je
+            continue
+        else:
+            if pop is not None:
+                yield (pop, pib, pie, pjb, pje)
+            pop, pib, pie, pjb, pje = op, ib, ie, jb, je
+    if pop is not None:
+        yield (pop, pib, pie, pjb, pje)
 
 def edits(src, trg):
-    for op, ib, ie, jb, je in Levenshtein.opcodes(src, trg):
+    edits = Levenshtein.opcodes(src, trg)
+    edits = remove_equal(edits)
+    edits = merge_consecutive_edits(edits)
+    for op, ib, ie, jb, je in edits:
         if op == 'equal':
             continue
         if op == 'delete':
