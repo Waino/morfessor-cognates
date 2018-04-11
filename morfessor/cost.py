@@ -233,8 +233,6 @@ def lengthening(src, trg, edits):
                 cursor = trg[je - 1]
             else:
                 cursor = src[ie - 1]
-            print(edit)
-            print(cursor, src[ie], trg[je], ie, je)
             if src[ie] == cursor and trg[je] == cursor:
                 ie += 1
                 je += 1
