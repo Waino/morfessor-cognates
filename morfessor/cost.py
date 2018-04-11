@@ -206,10 +206,47 @@ def merge_consecutive_edits(edits):
     if pop is not None:
         yield (pop, pib, pie, pjb, pje)
 
+def lengthening(src, trg, edits):
+    """Represent lengthening sounds as longer replacements,
+    rather than insertions/deletions"""
+    for edit in edits:
+        op, ib, ie, jb, je = edit
+        if min(ie - ib, je - jb) > 0:
+            # only extend if one side is empty
+            yield op, ib, ie, jb, je
+            continue
+        use_trg = (ie - ib == 0)
+
+        if ib > 0 and jb > 0:
+            # try to expand left
+            if use_trg:
+                cursor = trg[jb]
+            else:
+                cursor = src[ib]
+            if src[ib - 1] == cursor and trg[jb - 1] == cursor:
+                ib -= 1
+                jb -= 1
+                op = 'replace'
+        if ie < len(src) - 1 and je < len(trg) - 1:
+            # try to expand right
+            if use_trg:
+                cursor = trg[je - 1]
+            else:
+                cursor = src[ie - 1]
+            print(edit)
+            print(cursor, src[ie], trg[je], ie, je)
+            if src[ie] == cursor and trg[je] == cursor:
+                ie += 1
+                je += 1
+                op = 'replace'
+        yield op, ib, ie, jb, je
+
+
 def edits(src, trg):
     edits = Levenshtein.opcodes(src, trg)
     edits = remove_equal(edits)
     edits = merge_consecutive_edits(edits)
+    edits = lengthening(src, trg, edits)
     for op, ib, ie, jb, je in edits:
         if op == 'equal':
             continue
