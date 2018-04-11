@@ -181,12 +181,14 @@ class CognateCost(object):
 
 
 def edits(src, trg):
-    for op, i, j in Levenshtein.editops(src, trg):
+    for op, ib, ie, jb, je in Levenshtein.opcodes(src, trg):
+        if op == 'equal':
+            continue
         if op == 'delete':
-            yield (src[i], '')
+            yield (src[ib:ie], '')
         elif op == 'insert':
-            yield ('', trg[j])
+            yield ('', trg[jb:je])
         elif op == 'replace':
-            yield (src[i], trg[j])
+            yield (src[ib:ie], trg[jb:je])
         else:
             raise Exception(op)
