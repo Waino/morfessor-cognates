@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import io
+import math
 import sys
 
 import logging
@@ -15,13 +16,15 @@ def main(argv):
     alpha = float(argv[0])
     data = []
     for line in io.open(argv[1], encoding='utf-8'):
-        _, src, trg = line.strip('\n').split('\t')
+        count, src, trg = line.strip('\n').split('\t')
+        count = int(count)
         if len(src) == 0:
             src = WILDCARD
         if len(trg) == 0:
             trg = WILDCARD
         compound = CognateConstructionMethods.type(src, trg)
-        data.append(DataPoint(count=1, compound=compound, splitlocs=()))
+        count = int(round(math.log(count + 1, 2))
+        data.append(DataPoint(count=count, compound=compound, splitlocs=()))
 
     model = BaselineModel(corpusweight=alpha, constr_class=CognateConstructionMethods)
     model.cost.set_edit_weight(10)
