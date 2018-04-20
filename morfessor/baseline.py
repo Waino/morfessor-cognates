@@ -9,6 +9,7 @@ import random
 
 from .cost import CognateCost
 from .constructions.base import BaseConstructionMethods
+from .constructions.cognate import WILDCARD
 from .corpus import LexiconEncoding, CorpusEncoding, \
     AnnotatedCorpusEncoding, FixedCorpusWeight
 from .utils import _progress, tail
@@ -270,14 +271,40 @@ class BaselineModel(object):
         Returns list of segments.
 
         """
+        # FIXME contains UGLY cognate-morfessor specific hacks!
+
         # if self._use_skips and self._test_skip(construction):
         #     return self.segment(construction)
         rcount, count = self._remove(construction)
+        src, trg = construction
+        src_rcount = 0
+        src_count = 0
+        wild_src = None
+        trg_rcount = 0
+        trg_count = 0
+        wild_trg = None
+        if src != WILDCARD and trg != WILDCARD:
+            # when modifying a cognate pair,
+            # also modify the corresponding wildcard constructions
+            wild_src = (src, WILDCARD)
+            if wild_src in self._analyses:
+                src_rcount, src_count = self._remove(wild_src)
+            else:
+                wild_src = None
+            wild_trg = (WILDCARD, trg)
+            if wild_trg in self._analyses:
+                trg_rcount, trg_count = self._remove(wild_trg)
+            else:
+                wild_trg = None
 
         # Check all binary splits and no split
         self._modify_construction_count(construction, count)
+        self._modify_construction_count(wild_src, src_count)
+        self._modify_construction_count(wild_trg, trg_count)
         mincost = self.get_cost()
         self._modify_construction_count(construction, -count)
+        self._modify_construction_count(wild_src, -src_count)
+        self._modify_construction_count(wild_trg, -trg_count)
 
         best_splitloc = None
 
@@ -285,9 +312,23 @@ class BaselineModel(object):
             prefix, suffix = self.cc.split(construction, loc)
             self._modify_construction_count(prefix, count)
             self._modify_construction_count(suffix, count)
+            if wild_src is not None:
+                src_prefix, src_suffix = self.cc.split(wild_src, loc)
+                self._modify_construction_count(src_prefix, src_count)
+                self._modify_construction_count(src_suffix, src_count)
+            if wild_trg is not None:
+                trg_prefix, trg_suffix = self.cc.split(wild_trg, loc)
+                self._modify_construction_count(trg_prefix, trg_count)
+                self._modify_construction_count(trg_suffix, trg_count)
             cost = self.get_cost()
             self._modify_construction_count(prefix, -count)
             self._modify_construction_count(suffix, -count)
+            if wild_src is not None:
+                self._modify_construction_count(src_prefix, -src_count)
+                self._modify_construction_count(src_suffix, -src_count)
+            if wild_trg is not None:
+                self._modify_construction_count(trg_prefix, -trg_count)
+                self._modify_construction_count(trg_suffix, -trg_count)
             if cost <= mincost:
                 mincost = cost
                 best_splitloc = loc
@@ -298,6 +339,16 @@ class BaselineModel(object):
             prefix, suffix = self.cc.split(construction, best_splitloc)
             self._modify_construction_count(prefix, count)
             self._modify_construction_count(suffix, count)
+            if wild_src is not None:
+                self._analyses[wild_src] = ConstrNode(src_rcount, src_count, best_splitloc)
+                src_prefix, src_suffix = self.cc.split(wild_src, best_splitloc)
+                self._modify_construction_count(src_prefix, src_count)
+                self._modify_construction_count(src_suffix, src_count)
+            if wild_trg is not None:
+                self._analyses[wild_trg] = ConstrNode(trg_rcount, trg_count, best_splitloc)
+                trg_prefix, trg_suffix = self.cc.split(wild_trg, best_splitloc)
+                self._modify_construction_count(trg_prefix, trg_count)
+                self._modify_construction_count(trg_suffix, trg_count)
             lp = self._recursive_split(prefix)
             if suffix != prefix:
                 return lp + self._recursive_split(suffix)
@@ -307,6 +358,12 @@ class BaselineModel(object):
             # Real construction
             self._analyses[construction] = ConstrNode(rcount, 0, None)
             self._modify_construction_count(construction, count)
+            if wild_src is not None:
+                self._analyses[wild_src] = ConstrNode(src_rcount, 0, None)
+                self._modify_construction_count(wild_src, src_count)
+            if wild_trg is not None:
+                self._analyses[wild_trg] = ConstrNode(trg_rcount, 0, None)
+                self._modify_construction_count(wild_trg, trg_count)
             return [construction]
 
     def _modify_construction_count(self, construction, dcount):
@@ -317,7 +374,7 @@ class BaselineModel(object):
         to/from the lexicon whenever necessary.
 
         """
-        if dcount == 0:
+        if dcount == 0 or construction is None:
             return
         if construction in self._analyses:
             rcount, count, splitloc = self._analyses[construction]

@@ -51,8 +51,8 @@ class CognateConstructionMethods(object):
 
     @classmethod
     def split(cls, construction, loc):
-        assert 0 < loc[0] < len(construction.src)
-        assert 0 < loc[1] < len(construction.trg)
+        assert 0 < loc[0] < len(construction.src) or construction.src == WILDCARD
+        assert 0 < loc[1] < len(construction.trg) or construction.trg == WILDCARD
         return (cls.type(cls._sub_slice(construction.src, stop=loc[0]),
                          cls._sub_slice(construction.trg, stop=loc[1])),
                 cls.type(cls._sub_slice(construction.src, start=loc[0]),
