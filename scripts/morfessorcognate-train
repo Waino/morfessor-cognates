@@ -14,8 +14,9 @@ from morfessor.data import DataPoint
 
 def main(argv):
     alpha = float(argv[0])
+    ew = float(argv[1])
     data = []
-    for line in io.open(argv[1], encoding='utf-8'):
+    for line in io.open(argv[2], encoding='utf-8'):
         count, src, trg = line.strip('\n').split('\t')
         count = int(count)
         if len(src) == 0:
@@ -23,15 +24,15 @@ def main(argv):
         if len(trg) == 0:
             trg = WILDCARD
         compound = CognateConstructionMethods.type(src, trg)
-        count = int(round(math.log(count + 1, 2))
+        count = int(round(math.log(count + 1, 2)))
         data.append(DataPoint(count=count, compound=compound, splitlocs=()))
 
     model = BaselineModel(corpusweight=alpha, constr_class=CognateConstructionMethods)
-    model.cost.set_edit_weight(10)
+    model.cost.set_edit_weight(ew)
     model.load_data(data)
     model.train_batch()
 
-    with io.open(argv[2], 'w', encoding='utf-8') as outf:
+    with io.open(argv[3], 'w', encoding='utf-8') as outf:
         for c,_,w in model.get_segmentations():
             print("{} {}".format(c, " + ".join(CognateConstructionMethods.to_string(w1) for w1 in w)), file=outf)
     for w, c in model.cost.edit_cost.counts.most_common():
