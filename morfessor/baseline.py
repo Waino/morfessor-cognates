@@ -317,6 +317,8 @@ class BaselineModel(object):
         to/from the lexicon whenever necessary.
 
         """
+        if dcount == 0:
+            return
         if construction in self._analyses:
             rcount, count, splitloc = self._analyses[construction]
         else:
