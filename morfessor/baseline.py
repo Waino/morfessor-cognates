@@ -286,12 +286,12 @@ class BaselineModel(object):
         if src != WILDCARD and trg != WILDCARD:
             # when modifying a cognate pair,
             # also modify the corresponding wildcard constructions
-            wild_src = (src, WILDCARD)
+            wild_src = self.cc.type(src, WILDCARD)
             if wild_src in self._analyses:
                 src_rcount, src_count = self._remove(wild_src)
             else:
                 wild_src = None
-            wild_trg = (WILDCARD, trg)
+            wild_trg = self.cc.type(WILDCARD, trg)
             if wild_trg in self._analyses:
                 trg_rcount, trg_count = self._remove(wild_trg)
             else:
