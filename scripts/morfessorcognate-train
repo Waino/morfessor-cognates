@@ -11,14 +11,20 @@ import morfessor
 from morfessor import BaselineModel
 from morfessor import CognateConstructionMethods, WILDCARD
 from morfessor.data import DataPoint
+from morfessor.io import MorfessorIO
 
 FIVEDOT = '\u2059' # 5-dot punctuation
 
 def main(argv):
     alpha = float(argv[0])
     ew = float(argv[1])
+    datafile = argv[2]
+    textmodel = argv[3]
+    binmodel = argv[4]
+    editoutfile = argv[5]
     data = []
-    for line in io.open(argv[2], encoding='utf-8'):
+    mio = MorfessorIO()
+    for line in io.open(datafile, encoding='utf-8'):
         count, src, trg = line.strip('\n').split('\t')
         count = int(count)
         if len(src) == 0:
@@ -40,12 +46,15 @@ def main(argv):
     model.load_data(data)
     model.train_batch()
 
-    with io.open(argv[3], 'w', encoding='utf-8') as outf:
+    with io.open(textmodel, 'w', encoding='utf-8') as outf:
         for c,_,w in model.get_segmentations():
             print("{} {}".format(c, " + ".join(CognateConstructionMethods.to_string(w1) for w1 in w)), file=outf)
-    for w, c in model.cost.edit_cost.counts.most_common():
-        if c > 0:
-            print('{}\t{}'.format(w, c))
+    mio.write_binary_model_file(binmodel, model)
+
+    with io.open(editoutfile, 'w', encoding='utf-8') as outf:
+        for w, c in model.cost.edit_cost.counts.most_common():
+            if c > 0:
+                print('{}\t{}'.format(w, c), file=outf)
     print('final cost components', file=sys.stderr)
     print('src  {}'.format(model.cost.src_cost.cost()), file=sys.stderr)
     print('trg  {}'.format(model.cost.trg_cost.cost()), file=sys.stderr)

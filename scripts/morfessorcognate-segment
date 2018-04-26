@@ -1,0 +1,61 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+import io
+import math
+import sys
+
+import logging
+
+import morfessor
+from morfessor import BaselineModel
+from morfessor import CognateConstructionMethods, WILDCARD
+from morfessor.data import DataPoint
+from morfessor.io import MorfessorIO
+
+FIVEDOT = '\u2059' # 5-dot punctuation
+
+def main(argv):
+    modelfile = argv[0]
+    side = argv[1]
+    assert side in ('src', 'trg')
+    infile = argv[2]
+    outfile = argv[3]
+
+    mio = MorfessorIO()
+    model = mio.read_binary_model_file(modelfile)
+    with open(infile, 'r') as lines:
+        with open(outfile, 'w') as outfobj:
+            for line in lines:
+                word = line.strip('\n')
+                if side == 'src':
+                    # append the end epsilon
+                    src = word + FIVEDOT
+                    trg = WILDCARD
+                else:
+                    src = WILDCARD
+                    trg = word + FIVEDOT
+                compound = CognateConstructionMethods.type(src, trg)
+                constructions, logp = model.viterbi_segment(compound)
+
+                if side == 'src':
+                    morphs = [cons.src for cons in constructions]
+                else:
+                    morphs = [cons.trg for cons in constructions]
+                morphs = [morph.replace(FIVEDOT, '') for morph in morphs]
+                morphs = [morph for morph in morphs if morph != '']
+                outfobj.write(' '.join(morphs))
+                outfobj.write('\n')
+
+
+class opts(dict):
+    log_file = None
+    verbose = 1
+    progress = True
+
+if __name__ == "__main__":
+    o = opts()
+    o['progress'] = True
+
+    morfessor.configure_logger(logging.getLogger(), o)
+    main(sys.argv[1:])

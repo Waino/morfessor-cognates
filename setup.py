@@ -38,6 +38,7 @@ setup(name='Morfessor',
                'scripts/tune_tokensync_init.py',
                'scripts/tune_tokensync_pseudocounts.py',
                'scripts/morfessorcognate-train',
+               'scripts/morfessorcognate-segment',
                ],
       install_requires=requires,
       extras_require={

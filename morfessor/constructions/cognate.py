@@ -26,9 +26,10 @@ class Wildcard(object):
         return True
 
 WILDCARD = Wildcard()
+CognateConstruction = collections.namedtuple("CognateConstruction", ['src', 'trg'])
 
 class CognateConstructionMethods(object):
-    type = collections.namedtuple("CognateConstruction", ['src', 'trg'])
+    type = CognateConstruction
 
     @staticmethod
     def force_split_locations(construction):
