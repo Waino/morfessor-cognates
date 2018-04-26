@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
+
 import collections
 from functools import total_ordering
+
+# use a (rare) unicode pipe as delimiter rather than the common slash
+DELIM = '￨'
 
 @total_ordering
 class Wildcard(object):
@@ -94,7 +99,7 @@ class CognateConstructionMethods(object):
 
     @classmethod
     def from_string(cls, string):
-        src, trg = string.split('/', 1)
+        src, trg = string.split(DELIM, 1)
         if len(src) == 0:
             src = WILDCARD
         if len(trg) == 0:
@@ -103,7 +108,7 @@ class CognateConstructionMethods(object):
 
     @staticmethod
     def to_string(construction):
-        return u"{}/{}".format(construction.src, construction.trg)
+        return u"{}{}{}".format(construction.src, DELIM, construction.trg)
 
     @staticmethod
     def corpus_key(construction):
