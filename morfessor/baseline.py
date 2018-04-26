@@ -687,7 +687,7 @@ class BaselineModel(object):
             splitlocs.append(path)
             path = grid[path][1]
 
-        constructions = list(self.cc.splitn(compound, reversed(splitlocs)))
+        constructions = list(self.cc.splitn(compound, list(reversed(splitlocs))))
 
         # Add boundary cost
         cost += (math.log(self.cost.tokens() +
