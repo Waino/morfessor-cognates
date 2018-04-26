@@ -12,6 +12,8 @@ from morfessor import BaselineModel
 from morfessor import CognateConstructionMethods, WILDCARD
 from morfessor.data import DataPoint
 
+FIVEDOT = '\u2059' # 5-dot punctuation
+
 def main(argv):
     alpha = float(argv[0])
     ew = float(argv[1])
@@ -21,8 +23,14 @@ def main(argv):
         count = int(count)
         if len(src) == 0:
             src = WILDCARD
+        else:
+            # append the end epsilon
+            src += FIVEDOT
         if len(trg) == 0:
             trg = WILDCARD
+        else:
+            # append the end epsilon
+            trg += FIVEDOT
         compound = CognateConstructionMethods.type(src, trg)
         count = int(round(math.log(count + 1, 2)))
         data.append(DataPoint(count=count, compound=compound, splitlocs=()))
