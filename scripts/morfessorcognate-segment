@@ -36,7 +36,7 @@ def main(argv):
                     src = WILDCARD
                     trg = word + FIVEDOT
                 compound = CognateConstructionMethods.type(src, trg)
-                constructions, logp = model.viterbi_segment(compound)
+                constructions, logp = model.viterbi_segment(compound, addcount=0)
 
                 if side == 'src':
                     morphs = [cons.src for cons in constructions]
