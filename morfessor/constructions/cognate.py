@@ -49,8 +49,8 @@ class CognateConstructionMethods(object):
             start = (0, start[1])
             end = (2, end[1])
         if construction.trg == WILDCARD:
-            start = (start[1], 0)
-            end = (end[1], 2)
+            start = (start[0], 0)
+            end = (end[0], 2)
 
         for gi in range(start[0] + 1, end[0]):
             for pi in range(start[1] + 1, end[1]):
