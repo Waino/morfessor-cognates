@@ -644,7 +644,6 @@ class BaselineModel(object):
 
         badlikelihood = self.cost.bad_likelihood(compound,addcount)
 
-        print('new compound', compound)
         for t in itertools.chain(self.cc.split_locations(compound), [None]):
             # Select the best path to current node.
             # Note that we can come from any node in history.
@@ -652,16 +651,13 @@ class BaselineModel(object):
             bestcost = None
 
             for pt in tail(maxlen, itertools.chain([None], self.cc.split_locations(compound, stop=t))):
-                print('t: {}, pt: {}'.format(t, pt))
                 if grid[pt][0] is None:
-                    print('None when retrieving from grid, point discarded')
                     continue
                 cost = grid[pt][0]
                 construction = self.cc.slice(compound, pt, t)
                 count = self.get_construction_count(construction)
                 if count > 0:
                     cost += (logtokens - math.log(count + addcount))
-                    if cost is None: print('None after log accum')
                 elif addcount > 0:
                     if self.cost.tokens() == 0:
                         cost += (addcount * math.log(addcount) +
@@ -669,30 +665,24 @@ class BaselineModel(object):
                     else:
                         cost += (logtokens - math.log(addcount) +
                                  newboundcost + self.cost.get_coding_cost(construction))
-                    if cost is None: print('None after addcount stuff')
 
                 elif self.cc.is_atom(construction):
                     cost += badlikelihood
-                    if cost is None: print('None after adding badlikelihood')
                 elif allow_longer_unk_splits:
                     # Some splits are forbidden, so longer unknown
                     # constructions have to be allowed
                     cost += len(self.cc.corpus_key(construction)) * badlikelihood
-                    if cost is None: print('None after adding long unk split')
                 else:
                     continue
                 #_logger.debug("cost(%s)=%.2f", construction, cost)
                 if bestcost is None or cost < bestcost:
                     bestcost = cost
                     bestpath = pt
-                if bestcost is None: print('bestcost is None for', construction)
-            if t is None: print('setting grid[None] to ', bestcost, bestpath)
             grid[t] = (bestcost, bestpath)
 
         splitlocs = []
 
         cost, path = grid[None]
-        if cost is None: print('None when finally retrieving from grid for', construction)
         while path is not None:
             splitlocs.append(path)
             path = grid[path][1]
@@ -700,7 +690,6 @@ class BaselineModel(object):
         constructions = list(self.cc.splitn(compound, list(reversed(splitlocs))))
 
         # Add boundary cost
-        if cost is None: print('None before adding boundary cost')
         cost += (math.log(self.cost.tokens() +
                           self.cost.compound_tokens()) -
                  math.log(self.cost.compound_tokens()))
