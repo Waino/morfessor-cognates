@@ -45,6 +45,12 @@ class CognateConstructionMethods(object):
         """
         start = (0,0) if start is None else start
         end = (len(construction.src), len(construction.trg)) if stop is None else stop
+        if construction.src == WILDCARD:
+            start = (0, start[1])
+            end = (2, end[1])
+        if construction.trg == WILDCARD:
+            start = (start[1], 0)
+            end = (end[1], 2)
 
         for gi in range(start[0] + 1, end[0]):
             for pi in range(start[1] + 1, end[1]):
@@ -76,8 +82,8 @@ class CognateConstructionMethods(object):
 
         prev = (0,0)
         for l in locs:
-            assert prev[0] < l[0] < len(construction.src)
-            assert prev[1] < l[1] < len(construction.trg)
+            assert prev[0] < l[0] < len(construction.src) or construction.src == WILDCARD
+            assert prev[1] < l[1] < len(construction.trg) or construction.trg == WILDCARD
             yield cls.type(cls._sub_slice(construction.src, prev[0], l[0]),
                            cls._sub_slice(construction.trg, prev[1], l[1]))
             prev = l
@@ -125,3 +131,11 @@ class CognateConstructionMethods(object):
     @staticmethod
     def atoms(construction):
         return construction
+
+    @classmethod
+    def is_atom(cls, construction):
+        if construction.src != WILDCARD and len(construction.src) > 1:
+            return False
+        if construction.trg != WILDCARD and len(construction.trg) > 1:
+            return False
+        return True
