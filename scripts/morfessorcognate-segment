@@ -8,7 +8,7 @@ import sys
 import logging
 
 import morfessor
-from morfessor import BaselineModel
+from morfessor.cognate import CognateModel
 from morfessor import CognateConstructionMethods, WILDCARD
 from morfessor.data import DataPoint
 from morfessor.io import MorfessorIO

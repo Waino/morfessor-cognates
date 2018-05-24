@@ -39,4 +39,9 @@ from .evaluation import MorfessorEvaluation, MorfessorEvaluationResult
 
 from .constructions.base import BaseConstructionMethods
 from .constructions.parallel import ParallelConstructionMethods
-from .constructions.cognate import CognateConstructionMethods, WILDCARD
+
+try:
+    from .cognate import CognateModel, CognateCost
+    from .constructions.cognate import CognateConstructionMethods, WILDCARD
+except ImportError:
+    _logger.warn('To use cognate morfessor, install python-Levenshtein')
