@@ -132,17 +132,20 @@ class CognateModel(BaselineModel):
 
         if best_splitloc:
             # Virtual construction
-            self._analyses[construction] = ConstrNode(rcount, count, best_splitloc)
+            self._analyses[construction] = ConstrNode(
+                rcount, count, best_splitloc)
             prefix, suffix = self.cc.split(construction, best_splitloc)
             self._modify_construction_count(prefix, count)
             self._modify_construction_count(suffix, count)
             if wild_src is not None:
-                self._analyses[wild_src] = ConstrNode(src_rcount, src_count, best_splitloc)
+                self._analyses[wild_src] = ConstrNode(
+                    src_rcount, src_count, best_splitloc)
                 src_prefix, src_suffix = self.cc.split(wild_src, best_splitloc)
                 self._modify_construction_count(src_prefix, src_count)
                 self._modify_construction_count(src_suffix, src_count)
             if wild_trg is not None:
-                self._analyses[wild_trg] = ConstrNode(trg_rcount, trg_count, best_splitloc)
+                self._analyses[wild_trg] = ConstrNode(
+                    trg_rcount, trg_count, best_splitloc)
                 trg_prefix, trg_suffix = self.cc.split(wild_trg, best_splitloc)
                 self._modify_construction_count(trg_prefix, trg_count)
                 self._modify_construction_count(trg_suffix, trg_count)
@@ -196,7 +199,8 @@ class CognateCost(object):
         self.edit_weight = weight
 
     def cost(self):
-        return self.src_cost.cost() + self.trg_cost.cost() + self.edit_weight * self.edit_cost.cost()
+        return self.src_cost.cost() + self.trg_cost.cost() + \
+            self.edit_weight * self.edit_cost.cost()
 
     def update(self, construction, delta):
         if delta == 0:
@@ -228,7 +232,8 @@ class CognateCost(object):
         return self.src_cost.tokens() + self.trg_cost.tokens()
 
     def compound_tokens(self):
-        return self.src_cost.compound_tokens() + self.trg_cost.compound_tokens()
+        return self.src_cost.compound_tokens() + \
+            self.trg_cost.compound_tokens()
 
     def types(self):
         return self.src_cost.types() + self.trg_cost.types()
@@ -237,7 +242,8 @@ class CognateCost(object):
         return self.src_cost.all_tokens() + self.trg_cost.all_tokens()
 
     def newbound_cost(self, count):
-        return self.src_cost.newbound_cost(count) + self.trg_cost.newbound_cost(count)
+        return self.src_cost.newbound_cost(count) + \
+            self.trg_cost.newbound_cost(count)
 
     def bad_likelihood(self, compound, addcount):
         src, trg = self.cc.corpus_key(compound)
@@ -250,7 +256,8 @@ class CognateCost(object):
 
     def get_coding_cost(self, compound):
         src, trg = self.cc.lex_key(compound)
-        return self.src_cost.get_coding_cost(src) + self.trg_cost.get_coding_cost(trg)
+        return self.src_cost.get_coding_cost(src) + \
+            self.trg_cost.get_coding_cost(trg)
 
 
 def remove_equal(edits):

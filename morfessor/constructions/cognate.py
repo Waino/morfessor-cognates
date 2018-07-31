@@ -6,6 +6,7 @@ from functools import total_ordering
 # use a (rare) unicode pipe as delimiter rather than the common slash
 DELIM = '￨'
 
+
 @total_ordering
 class Wildcard(object):
     def __repr__(self):
@@ -29,7 +30,9 @@ class Wildcard(object):
         return iter([])
 
 WILDCARD = Wildcard()
-CognateConstruction = collections.namedtuple("CognateConstruction", ['src', 'trg'])
+CognateConstruction = collections.namedtuple(
+    "CognateConstruction", ['src', 'trg'])
+
 
 class CognateConstructionMethods(object):
     type = CognateConstruction
@@ -41,9 +44,10 @@ class CognateConstructionMethods(object):
     @staticmethod
     def split_locations(construction, start=None, stop=None):
         """
-        Return all possible split-locations between start and end. Start and end will not be returned.
+        Return all possible split-locations between start and end.
+        Start and end will not be returned.
         """
-        start = (0,0) if start is None else start
+        start = (0, 0) if start is None else start
         end = (len(construction.src), len(construction.trg)) if stop is None else stop
         if construction.src == WILDCARD:
             start = (0, start[1])
@@ -80,7 +84,7 @@ class CognateConstructionMethods(object):
                 yield p
             return
 
-        prev = (0,0)
+        prev = (0, 0)
         for l in locs:
             assert prev[0] < l[0] < len(construction.src) or construction.src == WILDCARD
             assert prev[1] < l[1] < len(construction.trg) or construction.trg == WILDCARD
@@ -102,7 +106,7 @@ class CognateConstructionMethods(object):
 
     @classmethod
     def slice(cls, construction, start=None, stop=None):
-        start = (0,0) if start is None else start
+        start = (0, 0) if start is None else start
         stop = (len(construction.src), len(construction.trg)) if stop is None else stop
         return cls.type(cls._sub_slice(construction.src, start[0], stop[0]),
                         cls._sub_slice(construction.trg, start[1], stop[1]))
