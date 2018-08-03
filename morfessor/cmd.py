@@ -467,7 +467,7 @@ def main(args):
         if args.list:
             data = io.read_corpus_list_files(args.trainfiles)
         else:
-            data = io.read_corpus_files(args.trainfiles)
+            data = io.read_corpus_files(args.trainfiles, retain_newlines=False)
         data = [DataPoint(d[0], d[1], ()) for d in data]
         data = merge_counts(data)
 

@@ -385,6 +385,16 @@ class BaselineModel(object):
             self._set_compound_analysis(dp.compound, self.cc.splitn(dp.compound, dp.splitlocs))
         return self.get_cost()
 
+    # FIXME: refactor?
+    def load_segmentations(self, segmentations):
+        self._check_segment_only()
+        for count, compound, constructions in segmentations:
+            splitlocs = tuple(self.cc.parts_to_splitlocs(constructions))
+            self._add_compound(compound, count)
+            self._clear_compound_analysis(compound)
+            self._set_compound_analysis(compound, self.cc.splitn(compound, splitlocs))
+        return self.get_cost()
+
     def segment(self, compound):
         """Segment the compound by looking it up in the model analyses.
 
