@@ -1,5 +1,5 @@
-Morfessor 2.0 - Quick start
-===========================
+Cognate Morfessor - Quick start
+===============================
 
 
 Installation
@@ -12,84 +12,31 @@ python setup.py install
 
 For details, see http://docs.python.org/install/
 
+Cognate Morfessor has a dependency on python-Levenshtein.
 
 Documentation
 -------------
 
-User instructions for Morfessor 2.0 are available in the docs directory
-as Sphinx source files (see http://sphinx-doc.org/). Instructions how
-to build the documentation can be found in docs/README.
+TODO: User instructions for Cognate Morfessor.
 
-The documentation is also available on-line at http://morfessor.readthedocs.org/
+The documentation for Morfessor Baseline 2.0 might be helpful:
+It is available online at http://morfessor.readthedocs.org/
 
-Details of the implemented algorithms and methods and a set of
-experiments are described in the following technical report:
+Citing
+------
 
-Sami Virpioja, Peter Smit, Stig-Arne Grönroos, and Mikko
-Kurimo. Morfessor 2.0: Python Implementation and Extensions for
-Morfessor Baseline. Aalto University publication series SCIENCE +
-TECHNOLOGY, 25/2013. Aalto University, Helsinki, 2013. ISBN
-978-952-60-5501-5.
+Details of the algorithm and experiments applying it to NMT
+are described in the following paper:
 
-The report is available online at 
+Stig-Arne Grönroos, Sami Virpioja, and Mikko Kurimo.
+Cognate-aware morphological segmentation for multilingual
+neural translation.
+Proceedings of the Third Conference on Machine Translation,
+Brussels, Belgium, Oct 2018. Association for Computational
+Linguistics.
 
-http://urn.fi/URN:ISBN:978-952-60-5501-5
+(To appear. FIXME: add link)
 
-
-Restricted Morfessor
---------------------
-
-This branch includes the modifications to Morfessor that enable
-restricting segmentation points using a linguistic gold standard.
-Morfessor may then join some of the linguistic morphs, but can not
-split linguistic morphs into smaller parts.
-
-The modifications have an impact on memory consumption. For this
-reason, we have not included them in the main branch at this time.
-
-To use the Restricted Morfessor, give the linguistic restrictions
-using ``--restricted-segmentation <file>``. The restrictions should be
-in the same format as Morfessor annotated data files:
-
-Example: ::
-
-    kahvikakku kahvi kak ku
-
-
-It is recommended to first train using the recursive training algorithm,
-but switch over to Viterbi training after a few iterations.
-This can be done using the command line argument sequence
-``--algorithm recursive --algorithm flatten --algorithm viterbi``
-
-An example command using omorfi-derived segmentation: ::
-
-    morfessor -e utf-8 --traindata-list -d none \
-        --restricted-segmentation "restrictions.omorfi.fi" \
-        --algorithm recursive --algorithm flatten --algorithm viterbi \
-        -t wordcounts.fi -w 1.0 \
-        -S model.alpha1.0.seg
-
-
-Aligned token count tuning
---------------------------
-
-In the paper [1], the corpus weight for Morfessor was tuned to balance
-the number of tokens between the source and segmented target language.
-
-Train a grid of models with different corpus weight parameters.
-Then evaluate the models with the command: ::
-
-    tune_tokensync.py -e utf-8 \
-        --aligned-reference parallel.en \
-        --aligned-to-segment parallel.fi \
-        model.alpha*.seg
-
-[1]: Stig-Arne Grönroos, Sami Virpioja and Mikko Kurimo.  Hybrid
-Morphological Segmentation for Phrase-Based Machine Translation.
-Proceedings of the First Conference on Machine Translation, pages
-289–295, Berlin, Germany, August 2016. Association for Computational
-Linguistics. Available on-line:
-http://www.statmt.org/wmt16/pdf/W16-2312.pdf
 
 Contact
 -------

@@ -11,7 +11,7 @@ main_py = open('morfessor/__init__.py', encoding='utf-8').read()
 metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", main_py))
 
 requires = [
-    #    'progressbar',
+        'python-Levenshtein',
 ]
 
 setup(name='Morfessor',

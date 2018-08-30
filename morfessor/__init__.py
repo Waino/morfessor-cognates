@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Morfessor 2.0 - Python implementation of the Morfessor method
+Cognate Morfessor 2.0 - Python implementation of the Morfessor method
 """
 import logging
 
@@ -11,7 +11,7 @@ __all__ = ['MorfessorException', 'ArgumentException', 'MorfessorIO',
            'get_evaluation_argparser']
 
 __version__ = '2.0.3'
-__author__ = 'Sami Virpioja, Peter Smit, Stig-Arne Grönroos'
+__author__ = 'Stig-Arne Grönroos, Peter Smit, Sami Virpioja'
 __author_email__ = "morpho@aalto.fi"
 
 show_progress_bar = True
