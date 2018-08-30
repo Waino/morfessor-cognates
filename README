@@ -19,8 +19,13 @@ Documentation
 
 TODO: User instructions for Cognate Morfessor.
 
-The documentation for Morfessor Baseline 2.0 might be helpful:
-It is available online at http://morfessor.readthedocs.org/
+The relevant commands are called
+morfessorcognate-train and morfessorcognate-segment .
+View their source code for usage.
+
+These scripts might be helpful for preprocessing:
+scripts/tools/merge_lists.py
+scripts/tools/extract_seg_maps.py
 
 Citing
 ------
