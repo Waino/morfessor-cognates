@@ -65,11 +65,20 @@ class BaselineModel(object):
         # self._corpus_coding = CorpusEncoding(self._lexicon_coding)
         # self._annot_coding = None
 
-        #Set corpus weight updater
-        # self.set_corpus_weight_updater(corpusweight)
-
         self.cost = Cost(self.cc, corpusweight)
 
+        #Set corpus weight updater
+        self.set_corpus_weight_updater(corpusweight)
+
+    def set_corpus_weight_updater(self, corpus_weight):
+        if corpus_weight is None:
+            self._corpus_weight_updater = FixedCorpusWeight(1.0)
+        elif isinstance(corpus_weight, numbers.Number):
+            self._corpus_weight_updater = FixedCorpusWeight(corpus_weight)
+        else:
+            self._corpus_weight_updater = corpus_weight
+
+        self._corpus_weight_updater.update(self, 0)
 
     @property
     def tokens(self):

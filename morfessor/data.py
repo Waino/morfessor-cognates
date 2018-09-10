@@ -29,7 +29,7 @@ def freq_threshold(data, threshold, online=False):
     else:
         for dp in data:
             if dp.count >= threshold:
-                yield dp.count
+                yield dp
 
 
 def count_modifier(data, modifier, online=False):
