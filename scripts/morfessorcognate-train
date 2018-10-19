@@ -7,11 +7,11 @@ import sys
 
 import logging
 
-import morfessor
-from morfessor.cognate import CognateModel
-from morfessor import CognateConstructionMethods, WILDCARD
-from morfessor.data import DataPoint
-from morfessor.io import MorfessorIO
+import morfessorcognate
+from morfessorcognate.cognate import CognateModel
+from morfessorcognate import CognateConstructionMethods, WILDCARD
+from morfessorcognate.data import DataPoint
+from morfessorcognate.io import MorfessorIO
 
 FIVEDOT = '\u2059' # 5-dot punctuation
 
@@ -83,5 +83,5 @@ if __name__ == "__main__":
     o = opts()
     o['progress'] = True
 
-    morfessor.configure_logger(logging.getLogger(), o)
+    morfessorcognate.configure_logger(logging.getLogger(), o)
     main(sys.argv[1:])
