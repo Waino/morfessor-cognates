@@ -32,7 +32,6 @@ else:
 _logger = logging.getLogger(__name__)
 
 
-
 def get_default_argparser():
     import argparse
 
@@ -121,6 +120,9 @@ Interactive use (read corpus from user):
             "segmentation of new words.")
     add_arg('-x', '--lexicon', dest="lexfile", default=None, metavar='<file>',
             help="output final lexicon to given file")
+    add_arg('--save-parameters', dest='saveparamsfile', default=None,
+            metavar='<file>',
+            help='Save hyperparameters to file. ')
     add_arg('--nbest', dest="nbest", default=1, type=int, metavar='<int>',
             help="output n-best viterbi results")
 
@@ -575,6 +577,11 @@ def main(args):
     # Output lexicon
     if args.lexfile is not None:
         io.write_lexicon_file(args.lexfile, model.get_constructions())
+
+    # Output hyperparameters
+    if args.saveparamsfile is not None:
+        io.write_parameter_file(args.saveparamsfile,
+                                model.get_params())
 
     if args.savereduced is not None:
         model.make_segment_only()

@@ -818,6 +818,15 @@ class BaselineModel(object):
             self._clear_compound_analysis(compound)
             self._set_compound_analysis(compound, [compound])
 
+    def get_params(self):
+        """Returns a dict of hyperparameters."""
+        params = {'corpusweight': self.get_corpus_coding_weight()}
+        #if self._supervised:
+        #    params['annotationweight'] = self._annot_coding.weight
+        params['forcesplit'] = ''.join(sorted(self.cc._force_splits))
+        if self.cc._nosplit:
+            params['nosplit'] = self.cc._nosplit.pattern
+        return params
 
 # count = count of the node
 # splitloc = integer or tuple. Location(s) of the possible splits for virtual
