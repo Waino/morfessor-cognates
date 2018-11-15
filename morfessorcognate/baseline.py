@@ -115,8 +115,9 @@ class BaselineModel(object):
 
         """
         forced_epochs = 0
-        if self._corpus_weight_updater.update(self, epoch_num):
-            forced_epochs += 2
+        if self._corpus_weight_updater is not None:
+            if self._corpus_weight_updater.update(self, epoch_num):
+                forced_epochs += 2
 
         # if self._use_skips:
         #     self._counter = collections.Counter()

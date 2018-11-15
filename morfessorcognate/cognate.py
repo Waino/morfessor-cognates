@@ -59,6 +59,7 @@ class CognateModel(BaselineModel):
 
         #Set corpus weight updater
         # self.set_corpus_weight_updater(corpusweight)
+        self._corpus_weight_updater = None
 
         self.cost = CognateCost(self.cc, corpusweight)
 
