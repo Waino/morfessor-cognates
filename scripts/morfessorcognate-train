@@ -22,6 +22,8 @@ def main(argv):
     textmodel = argv[3]
     binmodel = argv[4]
     editoutfile = argv[5]
+    use_epsilon = True
+
     data = []
     mio = MorfessorIO()
     for line in io.open(datafile, encoding='utf-8'):
@@ -29,12 +31,12 @@ def main(argv):
         count = int(count)
         if len(src) == 0:
             src = WILDCARD
-        else:
+        elif use_epsilon:
             # append the end epsilon
             src += FIVEDOT
         if len(trg) == 0:
             trg = WILDCARD
-        else:
+        elif use_epsilon:
             # append the end epsilon
             trg += FIVEDOT
         compound = CognateConstructionMethods.type(src, trg)

@@ -21,6 +21,7 @@ def main(argv):
     assert side in ('src', 'trg')
     infile = argv[2]
     outfile = argv[3]
+    use_epsilon = True
 
     mio = MorfessorIO()
     model = mio.read_binary_model_file(modelfile)
@@ -28,13 +29,15 @@ def main(argv):
         with open(outfile, 'w') as outfobj:
             for line in lines:
                 word = line.strip('\n')
-                if side == 'src':
+                if use_epsilon:
                     # append the end epsilon
-                    src = word + FIVEDOT
+                    word += FIVEDOT
+                if side == 'src':
+                    src = word
                     trg = WILDCARD
                 else:
                     src = WILDCARD
-                    trg = word + FIVEDOT
+                    trg = word
                 compound = CognateConstructionMethods.type(src, trg)
                 constructions, logp = model.viterbi_segment(compound, addcount=0)
 
