@@ -167,6 +167,41 @@ class CognateModel(BaselineModel):
                 self._modify_construction_count(wild_trg, trg_count)
             return [construction]
 
+    def get_construction_count(self, construction):
+        if construction.src == WILDCARD:
+            return self.get_onesided_construction_count(
+                construction.trg, 'trg')
+        if construction.trg == WILDCARD:
+            return self.get_onesided_construction_count(
+                construction.src, 'src')
+        # else
+        return super().get_construction_count(construction)
+
+    def get_onesided_construction_count(self, construction, side):
+        if side == 'src':
+            try:
+                counts = self._src_counts
+            except AttributeError:
+                self.count_onesided()
+                counts = self._src_counts
+        else:
+            try:
+                counts = self._trg_counts
+            except AttributeError:
+                self.count_onesided()
+                counts = self._trg_counts
+        return counts.get(construction, 0)
+
+    def count_onesided(self):
+        self._src_counts = collections.Counter()
+        self._trg_counts = collections.Counter()
+        for construction, constr_node in self._analyses.items():
+            if constr_node.splitloc:
+                continue
+            if construction.src != WILDCARD:
+                self._src_counts[construction.src] += constr_node.count
+            if construction.trg != WILDCARD:
+                self._trg_counts[construction.trg] += constr_node.count
 
 class CognateCost(object):
     def __init__(self, contr_class, corpusweight=1.0):
