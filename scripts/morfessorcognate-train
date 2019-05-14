@@ -16,7 +16,14 @@ from morfessorcognate.io import MorfessorIO
 FIVEDOT = '\u2059' # 5-dot punctuation
 
 def main(argv):
-    alpha = float(argv[0])
+    alpha = argv[0]
+    if ',' in alpha:
+        alpha_src, alpha_trg = alpha.split(',')
+        alpha_src = float(alpha_src)
+        alpha_trg = float(alpha_trg)
+    else:
+        alpha_src = float(alpha)
+        alpha_trg = float(alpha)
     ew = float(argv[1])
     datafile = argv[2]
     textmodel = argv[3]
@@ -43,7 +50,8 @@ def main(argv):
         count = int(round(math.log(count + 1, 2)))
         data.append(DataPoint(count=count, compound=compound, splitlocs=()))
 
-    model = CognateModel(corpusweight=alpha, constr_class=CognateConstructionMethods)
+    model = CognateModel(corpusweight=(alpha_src, alpha_trg),
+                         constr_class=CognateConstructionMethods)
     model.cost.set_edit_weight(ew)
     model.load_data(data)
     model.train_batch()
@@ -57,6 +65,8 @@ def main(argv):
         for w, c in model.cost.edit_cost.counts.most_common():
             if c > 0:
                 print('{}\t{}'.format(w, c), file=outf)
+    print('alphas: src {} trg {}'.format(model.cost.src_cost._corpus_coding.weight,
+                                         model.cost.trg_cost._corpus_coding.weight))
     print('final cost components', file=sys.stderr)
     print('src  {}'.format(model.cost.src_cost.cost()), file=sys.stderr)
     print('trg  {}'.format(model.cost.trg_cost.cost()), file=sys.stderr)

@@ -177,8 +177,13 @@ class CognateModel(BaselineModel):
 
 class CognateCost(object):
     def __init__(self, contr_class, corpusweight=1.0):
-        self.src_cost = Cost(contr_class, corpusweight=corpusweight)
-        self.trg_cost = Cost(contr_class, corpusweight=corpusweight)
+        try:
+            corpusweight_src, corpusweight_trg = corpusweight
+        except TypeError:
+            corpusweight_src = corpusweight
+            corpusweight_trg = corpusweight
+        self.src_cost = Cost(contr_class, corpusweight=corpusweight_src)
+        self.trg_cost = Cost(contr_class, corpusweight=corpusweight_trg)
         self.edit_cost = Cost(contr_class, corpusweight=1.0)
         self.edit_weight = 1.0
 
@@ -186,7 +191,7 @@ class CognateCost(object):
         self._corpus_weight_updater = None
 
         #Set corpus weight updater
-        self.set_corpus_weight_updater(corpusweight)
+        #self.set_corpus_weight_updater(corpusweight)
 
     def set_corpus_weight_updater(self, corpus_weight):
         if corpus_weight is None:
