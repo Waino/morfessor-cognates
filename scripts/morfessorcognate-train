@@ -66,7 +66,7 @@ def main(argv):
             if c > 0:
                 print('{}\t{}'.format(w, c), file=outf)
     print('alphas: src {} trg {}'.format(model.cost.src_cost._corpus_coding.weight,
-                                         model.cost.trg_cost._corpus_coding.weight))
+                                         model.cost.trg_cost._corpus_coding.weight), file=sys.stderr)
     print('final cost components', file=sys.stderr)
     print('src  {}'.format(model.cost.src_cost.cost()), file=sys.stderr)
     print('trg  {}'.format(model.cost.trg_cost.cost()), file=sys.stderr)
