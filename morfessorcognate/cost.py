@@ -75,7 +75,6 @@ class Cost(object):
         return self._corpus_coding.boundaries
 
     def types(self):
-        print('types', self._lexicon.coding.boundaries)
         return self._lexicon.coding.boundaries
 
     def all_tokens(self):
