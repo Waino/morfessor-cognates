@@ -41,6 +41,9 @@ class Cost(object):
     def set_corpus_coding_weight(self, weight):
         self._corpus_coding.weight = weight
 
+    def get_corpus_coding_weight(self):
+        return self._corpus_coding.weight
+
     def cost(self):
         return self._lexicon_coding.get_cost() + self._corpus_coding.get_cost()
 
@@ -72,6 +75,7 @@ class Cost(object):
         return self._corpus_coding.boundaries
 
     def types(self):
+        print('types', self._lexicon.coding.boundaries)
         return self._lexicon.coding.boundaries
 
     def all_tokens(self):

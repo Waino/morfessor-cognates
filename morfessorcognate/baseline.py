@@ -125,6 +125,10 @@ class BaselineModel(object):
         #     self._update_annotation_choices()
         #     self._annot_coding.update_weight()
 
+        # doesnt seem to be converging
+        if epoch_num > 15:
+            return 0
+
         return forced_epochs
 
     def _update_annotation_choices(self):

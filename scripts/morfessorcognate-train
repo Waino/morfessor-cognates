@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import print_function
+import argparse
 import io
 import math
 import sys
@@ -12,11 +13,36 @@ from morfessorcognate.cognate import CognateModel
 from morfessorcognate import CognateConstructionMethods, WILDCARD
 from morfessorcognate.data import DataPoint
 from morfessorcognate.io import MorfessorIO
+from morfessorcognate.corpus import NumMorphCorpusWeight
 
 FIVEDOT = '\u2059' # 5-dot punctuation
 
+def get_argparser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('alpha', type=str,
+        help='Corpus cost weight. Float or comma-separated pair of floats.')
+    parser.add_argument('editweight', type=float,
+        help='Edit cost weight')
+    parser.add_argument('train_data', type=str,
+        help='Path to training data. See data_example.morfessorcognate for format')
+    parser.add_argument('textmodel', type=str,
+        help='Path to save the model in text format')
+    parser.add_argument('binmodel', type=str,
+        help='Path to save the model in binary format')
+    parser.add_argument('editoutfile', type=str,
+        help='Path to dump the final edit counts')
+    parser.add_argument('--no-epsilon', dest='noepsilon', action='store_true',
+        help='Dont add empty character to end of words')
+    parser.add_argument('--num-morph-types', dest='morphtypes', default=None, type=float,
+            metavar='<float>',
+            help="tune the corpusweight to obtain the desired number of morph "
+                 "types")
+    return parser
+
 def main(argv):
-    alpha = argv[0]
+    parser = get_argparser()
+    args = parser.parse_args(argv)
+    alpha = args.alpha
     if ',' in alpha:
         alpha_src, alpha_trg = alpha.split(',')
         alpha_src = float(alpha_src)
@@ -24,12 +50,12 @@ def main(argv):
     else:
         alpha_src = float(alpha)
         alpha_trg = float(alpha)
-    ew = float(argv[1])
-    datafile = argv[2]
-    textmodel = argv[3]
-    binmodel = argv[4]
-    editoutfile = argv[5]
-    use_epsilon = True
+    ew = args.editweight
+    datafile = args.train_data
+    textmodel = args.textmodel
+    binmodel = args.binmodel
+    editoutfile = args.editoutfile
+    use_epsilon = not args.noepsilon
 
     data = []
     mio = MorfessorIO()
@@ -52,6 +78,11 @@ def main(argv):
 
     model = CognateModel(corpusweight=(alpha_src, alpha_trg),
                          constr_class=CognateConstructionMethods)
+    if args.morphtypes:
+        # doubled, because num_morph_types returns sum of lexicons
+        corpus_weight_updater = NumMorphCorpusWeight(args.morphtypes * 2, threshold=0.05)
+        model.set_corpus_weight_updater(corpus_weight_updater)
+
     model.cost.set_edit_weight(ew)
     model.load_data(data)
     model.train_batch()

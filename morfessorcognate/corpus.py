@@ -574,7 +574,7 @@ class NumMorphCorpusWeight(CorpusWeight):
     def update(self, model, epoch):
         if epoch < 1:
             return False
-        cur_morph_types = model._lexicon_coding.boundaries
+        cur_morph_types = model.num_morph_types()
 
         _logger.info("Number of morph types: {}".format(cur_morph_types))
 

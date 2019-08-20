@@ -58,7 +58,7 @@ class CognateModel(BaselineModel):
         # self._annot_coding = None
 
         #Set corpus weight updater
-        # self.set_corpus_weight_updater(corpusweight)
+        #self.set_corpus_weight_updater(corpusweight)
         self._corpus_weight_updater = None
 
         self.cost = CognateCost(self.cc, corpusweight)
@@ -175,6 +175,12 @@ class CognateModel(BaselineModel):
         # else
         return super().get_construction_count(construction)
 
+    def num_morph_types(self):
+        return self.cost.num_morph_types()
+
+    def get_corpus_coding_weight(self):
+        return self.cost.get_corpus_coding_weight()
+
 class CognateCost(object):
     def __init__(self, contr_class, corpusweight=1.0):
         try:
@@ -207,6 +213,12 @@ class CognateCost(object):
         self.src_cost.set_corpus_coding_weight(weight)
         self.trg_cost.set_corpus_coding_weight(weight)
         #self.edit_cost.set_corpus_coding_weight(weight)
+
+    def get_corpus_coding_weight(self):
+        src_weight = self.src_cost.get_corpus_coding_weight()
+        trg_weight = self.trg_cost.get_corpus_coding_weight()
+        assert src_weight == trg_weight
+        return src_weight
 
     def set_edit_weight(self, weight):
         self.edit_weight = weight
@@ -250,6 +262,9 @@ class CognateCost(object):
 
     def types(self):
         return self.src_cost.types() + self.trg_cost.types()
+
+    def num_morph_types(self):
+        return self.src_cost._lexicon_coding.boundaries + self.trg_cost._lexicon_coding.boundaries
 
     def all_tokens(self):
         return self.src_cost.all_tokens() + self.trg_cost.all_tokens()
