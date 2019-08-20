@@ -37,6 +37,10 @@ def get_argparser():
             metavar='<float>',
             help="tune the corpusweight to obtain the desired number of morph "
                  "types")
+    parser.add_argument('-d', '--dampening', dest="dampening", type=_str, default='log',
+            metavar='<type>', choices=['none', 'log', 'ones'],
+            help="frequency dampening for training data ('none', 'log', or "
+                 "'ones'; default '%(default)s')")
     return parser
 
 def main(argv):
@@ -73,7 +77,13 @@ def main(argv):
             # append the end epsilon
             trg += FIVEDOT
         compound = CognateConstructionMethods.type(src, trg)
-        count = int(round(math.log(count + 1, 2)))
+        if arg.dampening == 'none':
+            pass
+        elif arg.dampening == 'log':
+            count = int(round(math.log(count + 1, 2)))
+        elif arg.dampening == 'ones':
+            count = 1
+        
         data.append(DataPoint(count=count, compound=compound, splitlocs=()))
 
     model = CognateModel(corpusweight=(alpha_src, alpha_trg),

@@ -19,7 +19,7 @@ setup(name='Morfessor-cognate',
       author=metadata['author'],
       author_email='morpho@aalto.fi',
       url='http://morpho.aalto.fi',
-      description='Morfessor',
+      description='Morfessor-cognate',
       packages=['morfessorcognate', 'morfessorcognate.constructions'],
       classifiers=[
           'Development Status :: 4 - Beta',
